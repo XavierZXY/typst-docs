@@ -1,5 +1,5 @@
 // #show heading: set text(font: "Noto Serifs CJK SC", size: 13pt)
-#set text(font: "Noto Serif CJK SC", size: 11pt)
+#set text(font: "Noto Serif CJK SC", size: 10pt)
 
 #show link: underline
 
