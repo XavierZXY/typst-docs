@@ -14,13 +14,13 @@
 #set par(justify: true)
 
 #let chiline() = {v(-3pt); line(length: 100%); v(1pt)}
-// #place(right, [#image("me.jpg", height: auto, width: 13%)])
+#place(right, [#image("./images/me.jpg", height: auto, width: 13%)])
 
 = 邹翔宇
 中共党员 | 男 | 2000.11 \
 长沙理工大学-计算机科学与技术学士学位 | 2023.06 \
 \u{1f4e7} #link("mailto://zxy.xavier@gmail.com")[zxy.xavier\@gmail.com]
-\u{1f4e1}#link("https://www.github.com/xavierzxy")[github.com/XavierZXY] 
+\u{1f4e1} #link("https://www.github.com/xavierzxy")[github.com/XavierZXY] 
 \u{1f30d} #link("https://spacezxy.top/about")[www.spacezxy.top] 
 
 
