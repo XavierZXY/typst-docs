@@ -1,9 +1,9 @@
 // content.typ
 #import "./globals.typ": *
 
-= The Section 1
+= AlphaFold2
 
-== Slide Title
+== AlphaFold2
 
 #lorem(40)
 
