@@ -1,3 +1,5 @@
+#import "@preview/i-figured:0.2.4"
+
 #let project(
   title: "",
   authors: (),
@@ -6,37 +8,38 @@
   body,
 ) = {
   // let zh_shusong = ("SongTi CJK", "FZFangSong-Z02S", "FZShuSong-Z01S")
-  let zh_shusong = ("Noto Serif CJK SC", "SongTi")
+  let zh_shusong = "Noto Serif CJK SC"
   let zh_xiaobiansong = ("FZXiaoBiaoSong-B05", "FZXiaoBiaoSong-B05S")
-  let zh_kai = ("FZKai-Z03", "FZKai-Z03S")
-  let zh_hei = ("FZHei-B01", "FZHei-B01S")
+  let zh_kai = "FZKai-Z03S"
+  let zh_hei = "Noto Sans CJK SC"
   let zh_fangsong = ("FZFangSong-Z02", "FZFangSong-Z02S")
   let en_sans_serif = "Noto Serif CJK SC"
   let en_serif = "Times New Roman"
-  let en_typewriter = "Courier New"
+  let en_typewriter = "Times New Roman"
   let en_code = "Ubuntu Mono"
   // Moidfy the following to change the font.
-  let title-font = (en_serif, ..zh_hei)
-  let author-font = (en_typewriter, ..zh_fangsong)
-  let body-font = (en_serif, ..zh_shusong)
+  let title-font = (en_serif, zh_hei)
+  let author-font = (en_typewriter, zh_kai)
+  let body-font = (en_serif, zh_shusong)
   let heading-font = (en_serif, ..zh_xiaobiansong)
-  let caption-font = (en_serif, ..zh_kai)
-  let header-font = (en_serif, ..zh_kai)
-  let strong-font = (en_serif, ..zh_hei)
-  let emph-font = (en_serif, ..zh_kai)
-  let raw-font = (en_code, ..zh_hei)
+  let caption-font = (en_serif, zh_kai)
+  let header-font = (en_serif, zh_kai)
+  let strong-font = (en_serif, zh_hei)
+  let emph-font = (en_serif, zh_kai)
+  let raw-font = (en_code, zh_hei)
 
   set document(author: authors.map(author => author.name), title: title)
   set page(
     numbering: "1",
     number-align: center,
-    header: align(left)[
-      #set text(font: header-font)
-      #title
-    ],
+    // header: align(left)[
+    //   #set text(font: header-font)
+    //   #title
+    // ],
   )
+  set math.equation(numbering: "(1)")
   set heading(numbering: "1.1")
-  set text(font: body-font, lang: "zh", region: "cn")
+  set text(font: body-font, lang: "zh", region: "cn", size: 11pt)
   set bibliography(style: "gb-7714-2015-numeric")
 
   show heading: it => box(width: 100%)[
@@ -50,7 +53,7 @@
   show heading.where(level: 1): it => box(width: 100%)[
     #v(0.5em)
     #set align(center)
-    #set heading(numbering: "一")
+    #set heading(numbering: "1.")
     #it
     #v(0.75em)
   ]
@@ -72,7 +75,7 @@
       ..slice.map(author => align(
         center,
         {
-          text(12pt, author.name, font: author-font)
+          text(14pt, author.name, font: author-font)
           if "organization" in author [
             \ #text(author.organization, font: author-font)
           ]
@@ -90,12 +93,13 @@
   v(2em, weak: true)
 
   // Main body
-  set enum(indent: 2em)
-  set list(indent: 2em)
+  set enum(indent: 0em)
+  set list(indent: 0em)
   set figure(gap: 0.8cm)
 
   // 定义空白段，解决首段缩进问题
   let blank_par = par()[#text()[#v(0em, weak: true)];#text()[#h(0em)]]
+
 
   show figure: it => [
     #v(12pt)
@@ -142,7 +146,7 @@
   show raw: set text(font: raw-font)
   show link: underline
   show link: set text(blue)
-  set par(first-line-indent: 2em, justify: true)
+  set par(first-line-indent: 2em, justify: true, leading: 12pt)
 
   if abstract != none [
     #v(2pt)
