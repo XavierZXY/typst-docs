@@ -1,3 +1,4 @@
+
 // main.typ
 #import "./globals.typ": *
 
@@ -13,6 +14,7 @@
   ),
   progress-bar: false,
   // config-common(handout: true),
+  config-common(show-notes-on-second-screen: right),
 )
 #title-slide()
 

@@ -1,3 +1,4 @@
+
 // content.typ
 #import "./globals.typ": *
 // #set text(font: "Noto Serif CJK SC", size: 20pt)
@@ -48,9 +49,7 @@ Horizontal Pod Autoscaling(HPA) 是Kubernetes中的一种自动缩放机制。�
 
 == AHPA 系统架构
 
-#figure(
-  image("./images/p1.png", width: 80%),
-)<imgp1>
+#figure(image("./images/p1.png", width: 80%))<imgp1>
 
 === 1. 数据采集，收集系统各种指标数据
 === 2. 预测，根据历史数据预测未来负载
@@ -71,9 +70,7 @@ Horizontal Pod Autoscaling(HPA) 是Kubernetes中的一种自动缩放机制。�
   )
 
 ][
-  #figure(
-    image("./images/p2.png"),
-  )<imgp2>
+  #figure(image("./images/p2.png"))<imgp2>
 ]
 
 == 时序STL分解
@@ -88,17 +85,13 @@ $ y_t = "trend" + "seasonality" + "residual" $
 
 == AHPA 中的时序分解
 
-#figure(
-  image("./images/p3.png", height: 60%),
-)<imgp3>
+#figure(image("./images/p3.png", height: 60%))<imgp3>
 
 达摩院团队基于 STL 分解的思路利用深度学习做了一系列的创新研究。分别有RobustTrend,RobustSTL, 和 RobustPeriod, 最后以将上述算法集成的一个统一的异常检测系统。
 
 == FEDformer
 
-#figure(
-  image("./images/p4.png", width: 85%),
-)<imgp4>
+#figure(image("./images/p4.png", width: 85%))<imgp4>
 
 在数据较多的情况下，文中还提到了一种基于FEDformer的方法，通过引入FEDformer模型，可以更好地处理大量数据，提高模型的准确性。
 
@@ -112,9 +105,7 @@ AHPA 中主要采用运筹学中排队论的方法，包括两种不同的排队
 
 == AHPA Scale Plan Generation
 
-#figure(
-  image("./images/p5.png", width: 70%),
-)<imgp5>
+#figure(image("./images/p5.png", width: 70%))<imgp5>
 AHPA采用了改进的*预测偏移算法*。通过提前规划来尽量抵消启动延迟带来的影响，保障业务在需要资源时能及时有足够可用的 Pod 来处理请求。
 
 == AHPA的优势与不足
@@ -132,20 +123,21 @@ AHPA采用了改进的*预测偏移算法*。通过提前规划来尽量抵消�
 
 == Smart HPA
 
-#figure(
-  image("./images/p6.png", height: 65%),
-)<imgp6>
+#figure(image("./images/p6.png", height: 65%))<imgp6>
 
 Smart HPA 提出一种融合集中式和分散式架构风格的层次化架构.
 特别适用于资源受限环境下的微服务资源管理。
 == DeepScaling
 
-#figure(
-  image("./images/p7.png", width: 70%),
-)<imgp7>
+#figure(image("./images/p7.png", width: 70%))<imgp7>
 
 DeepScaling 通过引入多种深度学习模型，利用时空图神经网络（STGNN），深度 Q 网络（DQN）模型等，实现了对于复杂业务场景的自适应调整。
+
+#speaker-note[
+  AHPA
+]
 
 #focus-slide[
   Thanks for your attention!
 ]
+
