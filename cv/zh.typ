@@ -1,4 +1,4 @@
-
+#import "@preview/fontawesome:0.5.0": *
 // #show heading: set text(font: "Noto Serifs CJK SC", size: 13pt)
 #set text(font: "Noto Serif CJK SC", size: 10pt)
 
@@ -19,14 +19,17 @@
 }
 #place(right, [#image("./images/me.jpg", height: auto, width: 13%)])
 
+#let githublink(userRepo) = {
+  link("https://github.com/" + userRepo)[#fa-icon("github") #userRepo]
+}
+
 = 邹翔宇
 中共党员 | 男 | 2000.11 \
 长沙理工大学-计算机科学与技术学士学位 | 2023.06 \
 深圳大学&深圳理工大学-计算机技术研究生在读 | 2024.09 \
-\u{1f4e7} #link("mailto://zxy.xavier@gmail.com")[zxy.xavier\@gmail.com]
-\u{1f4e1} #link("https://www.github.com/xavierzxy")[github.com/XavierZXY]
-\u{1f30d} #link("https://spacezxy.top/about")[www.spacezxy.top]
-
+#fa-icon("envelope-circle-check") #link("mailto://zxy.xavier@gmail.com")[zxy.xavier\@gmail.com] #" "
+#githublink("XavierZXY") #" "
+#fa-icon("link") #link("https://spacezxy.top/about")[spacezxy.top]
 
 == 专业技能
 #chiline()
@@ -54,7 +57,7 @@
 
 == 项目经历
 #chiline()
-=== MiniMind #h(1fr) 2025.02
+=== MiniMind #h(1fr) #githublink("XavierZXY/Zero2Hero")#" " 2025.02
 - 从0开始的，参数量为25.8M的超小语言模型MiniMind
 - 数据集清洗，预训练(Pretrain)
 - 监督微调(SFT)，LoRA微调

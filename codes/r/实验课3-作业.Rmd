@@ -1,0 +1,327 @@
+---
+title: "实验课3-作业"
+author: "邹翔宇"
+date: "2025-03-19"
+documentclass: ctexart
+output: 
+  html_document: default
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+```{r eval=TRUE}
+library(tidyverse)
+```
+
+### 1. 第一题（20分）
+
+```{r eval=TRUE}
+medical_data <- tibble(
+  patient_id = c("P001", "P002", "P003", "P004", "P005"),
+  diagnosis = c("Hypertension", "Diabetes", "Asthma", "Hypertension", "Arthritis"),
+  systolic_bp = c(145, 130, NA, 155, 120),  # 收缩压（含缺失值）
+  cholesterol = c(210, 240, 195, 225, 180)  # 胆固醇（mg/dL）
+)
+```
+
+请基于medical_data完成以下任务：
+
+1)  使用管道符 %>%，对systolic_bp依次取自然对数、绝对值、平方根，并填充缺失值为0（5分）;  
+2)  将 diagnosis 重命名为 disease，并仅保留 patient_id, disease, systolic_bp 三列（5分）;  
+3)  新增列 risk_level：  
+若 systolic_bp > 140 或 cholesterol > 200，标记为 "High Risk"；  
+否则标记为 "Normal"（5分）;  
+4)  使用 case_when 将 systolic_bp 分为三档：  
+140为"High"，  
+120-140为"Normal"，  
+<120为"Low"（5分）。
+
+
+```{r eval=TRUE}
+# 1) 对 systolic_bp 取自然对数、绝对值、平方根，并填充缺失值为0
+result1 <- medical_data %>%
+  mutate(systolic_bp = ifelse(is.na(systolic_bp), 0, 
+                             sqrt(abs(log(systolic_bp)))))
+
+# 2) 将 diagnosis 重命名为 disease，并保留三列
+result2 <- medical_data %>%
+  rename(disease = diagnosis) %>%
+  select(patient_id, disease, systolic_bp)
+
+# 3) 新增 risk_level 列
+result3 <- medical_data %>%
+  mutate(risk_level = ifelse(systolic_bp > 140 | cholesterol > 200, 
+                            "High Risk", "Normal"))
+
+# 4) 使用 case_when 将 systolic_bp 分为三档
+result4 <- medical_data %>%
+  mutate(bp_category = case_when(
+    systolic_bp > 140 ~ "High",
+    systolic_bp >= 120 & systolic_bp <= 140 ~ "Normal",
+    systolic_bp < 120 ~ "Low",
+    TRUE ~ NA_character_  # 处理NA值
+  ))
+
+# 查看结果
+result1
+result2
+result3
+result4
+```
+
+
+### 第二题（20分）
+
+```{r eval=TRUE}
+ecommerce_data <- tibble(
+  order_id = c("O1001", "O1002", "O1003", "O1004", "O1005"),
+  product = c("Laptop", "Phone", "Tablet", NA, "Headphones"),
+  revenue = c(1200, 800, 450, 300, NA),  # 收入（美元）
+  rating = c(4.5, 4.2, NA, 3.8, 4.6)     # 客户评分（1-5）
+)
+```
+
+请基于ecommerce_data完成以下任务：
+
+1)  筛选 revenue >= 500 的行，并按 revenue 降序排列（5分）;  
+2)  使用 slice_max 提取 rating 最高的前2行（5分）;  
+3)  统计 product 和 rating 列的缺失值数量（5分）;  
+4)  用 "Unknown" 填充 product 列的缺失值，用列的均值填充 revenue 缺失值（5分）。
+
+
+```{r eval=TRUE}
+# 1) 筛选 revenue >= 500 的行，并按 revenue 降序排列
+result1 <- ecommerce_data %>%
+  filter(revenue >= 500) %>%
+  arrange(desc(revenue))
+
+# 2) 使用 slice_max 提取 rating 最高的前2行
+result2 <- ecommerce_data %>%
+  slice_max(rating, n = 2)
+
+# 3) 统计 product 和 rating 列的缺失值数量
+missing_counts <- tibble(
+  column_name = c("product", "rating"),
+  missing_count = c(sum(is.na(ecommerce_data$product)), 
+                   sum(is.na(ecommerce_data$rating)))
+)
+
+# 4) 用 "Unknown" 填充 product 列的缺失值，用列的均值填充 revenue 缺失值
+result4 <- ecommerce_data %>%
+  mutate(
+    product = if_else(is.na(product), "Unknown", product),
+    revenue = if_else(is.na(revenue), mean(revenue, na.rm = TRUE), revenue)
+  )
+
+# 查看结果
+result1
+result2
+missing_counts
+result4
+```
+
+### 第三题（20分）
+
+```{r eval=TRUE}
+# 环境监测数据集
+sensor_data <- tibble(
+  sensor_id = c("S01", "S02", "S03", "S04"),
+  location = c("Forest", "Urban", "Coast", "Mountain"),
+  pm25 = c(35, 68, 42, 12)  # PM2.5浓度（μg/m³）
+)
+
+weather_data <- tibble(
+  sensor_id = c("S01", "S02", "S05"),
+  temperature = c(22, 28, 18),  # 温度（℃）
+  humidity = c(65, 72, 80)       # 湿度（%）
+)
+
+```
+
+请基于sensor_data 和 weather_data完成以下任务：
+
+
+1) 将两数据框左连接（5分）；  
+2) 将 location 和 pm25 合并为新列 location_pm25，格式示例："Forest(35)"（5分）；  
+3) 将 location_pm25 拆分为 location 和 pm25，并验证是否与原数据一致（5分）；  
+4) 找出 sensor_data 中存在但 weather_data 中不存在的传感器（5分）。
+
+
+```{r eval=TRUE}
+# 1) 将两数据框左连接（5分）
+result1 <- sensor_data %>%
+  left_join(weather_data, by = "sensor_id")
+result1
+
+# 2) 将 location 和 pm25 合并为新列 location_pm25，格式示例："Forest(35)"（5分）
+result2 <- sensor_data %>%
+  mutate(location_pm25 = paste0(location, "(", pm25, ")"))
+result2
+
+# 3) 将 location_pm25 拆分为 location 和 pm25，并验证是否与原数据一致（5分）
+result3 <- result2 %>%
+  separate(location_pm25, into = c("location_new", "pm25_new"), 
+           sep = "\\(", remove = FALSE) %>%
+  mutate(pm25_new = as.numeric(str_remove(pm25_new, "\\)"))) %>%
+  # 验证是否与原数据一致
+  mutate(location_match = location == location_new,
+         pm25_match = pm25 == pm25_new)
+result3
+
+# 4) 找出 sensor_data 中存在但 weather_data 中不存在的传感器（5分）
+result4 <- sensor_data %>%
+  anti_join(weather_data, by = "sensor_id")
+result4
+```
+
+
+
+### 第四题（20分）
+
+```{r eval=TRUE}
+
+social_media <- tibble(
+  user_id = c("U101", "U102", "U103", "U104", "U105", "U106", "U107", "U108", "U109", "U110"),
+  likes_2023 = c(1200, 850, 920, 1100, 1300, 900, 1150, 670, 800, 1000),   # 2023年点赞数
+  likes_2024 = c(1500, 780, 1050, 1400, 1600, 850, 1250, 600, 900, 1100),  # 2024年点赞数
+  followers = c(5000, 3200, 4500, 6000, 4000, 3500, 4800, 2900, 3100, 5400) # 粉丝数
+)
+
+```
+
+请基于social_media完成以下任务：
+
+
+1) 将 likes_2023 和 likes_2024 转换为长数据格式，包含列 year 和 likes（5分）；  
+2) 将长数据转换回宽数据，并验证是否与原数据一致（5分）；  
+3) 用管道函数，计算每个user_id 的点赞数年度增长率（5分）；  
+4) 对 followers 列进行以下操作：  
+计算上下四分位数（Q1和Q3）  
+定义异常值范围：< Q1 - 1.5IQR 或 > Q3 + 1.5IQR  
+标记异常值为 TRUE，存入新列 is_outlier（5分）。  
+
+
+```{r eval=TRUE}
+# 1) 将 likes_2023 和 likes_2024 转换为长数据格式，包含列 year 和 likes（5分）；  
+result1 <- social_media %>%
+  pivot_longer(
+    cols = c(likes_2023, likes_2024),
+    names_to = "year",
+    values_to = "likes",
+    names_prefix = "likes_"
+  )
+result1
+
+# 2) 将长数据转换回宽数据，并验证是否与原数据一致（5分）；  
+result2 <- result1 %>%
+  pivot_wider(
+    names_from = year,
+    values_from = likes,
+    names_prefix = "likes_"
+  )
+
+# 验证是否与原数据一致
+all_equal(social_media %>% select(user_id, likes_2023, likes_2024), 
+          result2 %>% select(user_id, likes_2023, likes_2024))
+
+# 3) 用管道函数，计算每个user_id 的点赞数年度增长率（5分）；  
+result3 <- social_media %>%
+  mutate(growth_rate = (likes_2024 - likes_2023) / likes_2023 * 100) %>%
+  select(user_id, growth_rate)
+result3
+
+# 4) 对 followers 列进行以下操作：  
+# 计算上下四分位数（Q1和Q3）  
+# 定义异常值范围：< Q1 - 1.5IQR 或 > Q3 + 1.5IQR  
+# 标记异常值为 TRUE，存入新列 is_outlier（5分）。  
+result4 <- social_media %>%
+  mutate(
+    Q1 = quantile(followers, 0.25),
+    Q3 = quantile(followers, 0.75),
+    IQR = Q3 - Q1,
+    lower_bound = Q1 - 1.5 * IQR,
+    upper_bound = Q3 + 1.5 * IQR,
+    is_outlier = followers < lower_bound | followers > upper_bound
+  ) %>%
+  select(user_id, followers, is_outlier)
+
+# 显示结果
+result4
+```
+
+
+
+### 第五题（20分）
+
+```{r eval=TRUE}
+
+education_data <- tibble(
+  student_id = c("S1001", "S1002", "S1003", "S1004", "S1005", 
+                 "S1006", "S1007", "S1008", "S1009", "S1010"),
+  class = c("A", "A", "B", "B", "C", 
+            "C", "D", "D", "E", "E"),
+  math_score = c(85, 92, 78, 88, 95, 
+                 76, 89, 90, 84, 91),    
+  physics_score = c(75, 80, 85, 70, 90, 
+                    65, 88, 79, 82, 77),  
+  chemistry_score = c(88, 76, 90, 85, 93, 
+                      78, 81, 87, 84, 89)  
+)
+
+```
+
+请基于education_data完成以下任务：
+
+
+1) 计算 math_score 和 physics_score 的平均值、标准差和极差（5分）;  
+2) 按 class 分组，统计每组 physics_score 的最高分和最低分（5分）;  
+3) 按 class 分组，新增列 math_rank，表示每个班级内数学成绩的排名（5分）;  
+4) 找出数学和化学成绩均高于班级平均分的学生（5分）。
+
+```{r eval=TRUE}
+# 1) 计算 math_score 和 physics_score 的平均值、标准差和极差（5分）;  
+result1 <- education_data %>%
+  summarise(
+    math_mean = mean(math_score),
+    math_sd = sd(math_score),
+    math_range = max(math_score) - min(math_score),
+    physics_mean = mean(physics_score),
+    physics_sd = sd(physics_score),
+    physics_range = max(physics_score) - min(physics_score)
+  )
+result1
+
+# 2) 按 class 分组，统计每组 physics_score 的最高分和最低分（5分）;  
+result2 <- education_data %>%
+  group_by(class) %>%
+  summarise(
+    physics_max = max(physics_score),
+    physics_min = min(physics_score)
+  )
+result2
+
+# 3) 按 class 分组，新增列 math_rank，表示每个班级内数学成绩的排名（5分）;  
+result3 <- education_data %>%
+  group_by(class) %>%
+  mutate(math_rank = rank(desc(math_score))) %>%
+  ungroup()
+result3
+
+# 4) 找出数学和化学成绩均高于班级平均分的学生（5分）。
+result4 <- education_data %>%
+  group_by(class) %>%
+  mutate(
+    class_math_avg = mean(math_score),
+    class_chem_avg = mean(chemistry_score)
+  ) %>%
+  filter(
+    math_score > class_math_avg,
+    chemistry_score > class_chem_avg
+  ) %>%
+  select(student_id, class, math_score, chemistry_score, class_math_avg, class_chem_avg)
+result4
+```
+
+
+
+
