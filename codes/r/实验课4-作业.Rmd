@@ -1,0 +1,323 @@
+---
+title: "实验课4-作业"
+author: "邹翔宇"
+date: "2025-04-04"
+output: 
+  html_document: default
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+### 第一题（40分）
+
+R 自带数据集 iris 包含 3 种鸢尾花的形态测量数据。
+```
+Sepal.Length（萼片长度）
+Sepal.Width（萼片宽度）
+Petal.Length（花瓣长度）
+Petal.Width（花瓣宽度）
+Species（鸢尾花种类，setosa/versicolor/virginica）
+```
+
+请基于iris完成以下任务：
+
+1)  计算 Petal.Length 的均值、中位数、标准差和四分位距（5分）;  
+2)  按 Species 分组，计算各组 Sepal.Width 的均值和标准差，输出结果表格（5分）;  
+3)  绘制 Sepal.Length 的直方图，按 Species 填充不同颜色，添加标题“萼片长度分布（按种类）”（5分）;  
+4)  绘制 Petal.Width 的密度曲线，按 Species 填充颜色，分面显示种类（5分）;
+5)  计算 Sepal.Length 与 Petal.Length 的皮尔逊相关系数，并解释其生物学意义（5分）;  
+6)  绘制 Sepal.Width 与 Petal.Width 的散点图，用颜色区分 Species，添加分组趋势（5分）;  
+7)  绘制 Petal.Length 的箱线图，按 Species 分组，添加标题“不同种类的花瓣长度分布” （5分）;  
+8)  绘制每个种类在四个变量上的均值柱状图，要求四幅图并列展示（5分）。
+
+
+```{r eval=TRUE}
+# 1. 计算 Petal.Length 的均值、中位数、标准差和四分位距
+mean_pl <- mean(iris$Petal.Length)
+median_pl <- median(iris$Petal.Length)
+sd_pl <- sd(iris$Petal.Length)
+iqr_pl <- IQR(iris$Petal.Length)
+
+# 创建结果数据框
+result1 <- data.frame(
+  均值 = mean_pl,
+  中位数 = median_pl,
+  标准差 = sd_pl,
+  四分位距 = iqr_pl
+)
+print(result1)
+
+# 2. 按 Species 分组，计算各组 Sepal.Width 的均值和标准差
+library(dplyr)
+result2 <- iris %>%
+  group_by(Species) %>%
+  summarise(
+    均值 = mean(Sepal.Width),
+    标准差 = sd(Sepal.Width)
+  )
+print(result2)
+
+# 3. 绘制 Sepal.Length 的直方图，按 Species 填充不同颜色
+library(ggplot2)
+ggplot(iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_histogram(position = "identity", alpha = 0.7, bins = 30) +
+  labs(title = "萼片长度分布（按种类）", x = "萼片长度", y = "频数") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 4. 绘制 Petal.Width 的密度曲线，按 Species 填充颜色，分面显示种类
+ggplot(iris, aes(x = Petal.Width, fill = Species)) +
+  geom_density(alpha = 0.7) +
+  facet_wrap(~Species) +
+  labs(title = "花瓣宽度密度分布", x = "花瓣宽度", y = "密度") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 5. 计算 Sepal.Length 与 Petal.Length 的皮尔逊相关系数
+cor_value <- cor(iris$Sepal.Length, iris$Petal.Length, method = "pearson")
+cat("Sepal.Length 与 Petal.Length 的皮尔逊相关系数为:", cor_value, "\n")
+cat("生物学意义: 相关系数为", round(cor_value, 3), 
+    "表示萼片长度与花瓣长度之间存在很强的正相关关系。",
+    "这可能表明在鸢尾花的进化过程中，这两个特征受到相似的选择压力，",
+    "或者由相似的基因控制。较长的萼片通常伴随着较长的花瓣，",
+    "这种协同变异可能与授粉机制或植物形态发育相关。\n")
+
+# 6. 绘制 Sepal.Width 与 Petal.Width 的散点图，用颜色区分 Species，添加分组趋势
+ggplot(iris, aes(x = Sepal.Width, y = Petal.Width, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, alpha = 0.2) +
+  labs(title = "萼片宽度与花瓣宽度的关系", x = "萼片宽度", y = "花瓣宽度") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+# 7. 绘制 Petal.Length 的箱线图，按 Species 分组
+ggplot(iris, aes(x = Species, y = Petal.Length, fill = Species)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "不同种类的花瓣长度分布", x = "种类", y = "花瓣长度") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 8. 绘制每个种类在四个变量上的均值柱状图，要求四幅图并列展示
+# 首先准备数据：计算每个种类在每个变量上的均值
+mean_data <- iris %>%
+  group_by(Species) %>%
+  summarise(
+    Sepal.Length = mean(Sepal.Length),
+    Sepal.Width = mean(Sepal.Width),
+    Petal.Length = mean(Petal.Length),
+    Petal.Width = mean(Petal.Width)
+  )
+
+# 将数据转换为长格式
+mean_data_long <- tidyr::pivot_longer(
+  mean_data, 
+  cols = -Species, 
+  names_to = "Variable", 
+  values_to = "Mean"
+)
+
+# 绘制四个变量的均值柱状图
+ggplot(mean_data_long, aes(x = Species, y = Mean, fill = Species)) +
+  geom_col(alpha = 0.8) +
+  facet_wrap(~Variable, scales = "free_y", ncol = 4) +
+  labs(title = "不同种类在四个变量上的均值", x = "种类", y = "均值") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set1")
+
+```
+
+
+### 第二题（60分）
+
+```{r eval=TRUE}
+# install.packages("ISLR")  # 若未安装
+library(ISLR)
+data(Carseats)
+```
+
+Carseats 数据集记录了400家商店的儿童安全座椅销售数据，包含11个变量：
+
+```
+Sales：座椅销量（单位：千美元）。
+CompPrice：竞争对手价格（美元）。
+Income：家庭收入中位数（千美元）。
+Advertising：广告预算（千美元）。
+Population：地区人口（千人）。
+Price：座椅价格（美元）。
+ShelveLoc：货架位置（Bad/Medium/Good）。
+Age：地区年龄中位数。
+Education：教育水平。
+Urban：是否在城市（Yes/No）。
+US：是否在美国（Yes/No）。
+```
+
+请基于Carseats完成以下任务：
+
+1)  按 ShelveLoc 分组，绘制 Sales 的直方图，叠加密度曲线（5分）;  
+2)  按 ShelveLoc 分组，绘制 Price 的箱线图，添加标题“不同货架位置的价格分布”（5分）;  
+3)  按 Urban 分组，绘制 Price 的小提琴图（5分）;  
+4)  绘制 ShelveLoc 的水平条形图，标题为“货架位置分布”（5分）;
+5)  绘制 ShelveLoc 的饼图，添加百分比标签（5分）;  
+6)  绘制 Sales 与 Income 的散点图，用 ShelveLoc 区分颜色，分面显示 US（5分）;  
+7)  计算 Sales 与 Income的皮尔逊相关系数并将相关系数的结果数值画到6)的散点图上 （5分）;  
+8)  绘制 Sales、Price、CompPrice 的散点图矩阵（5分）;  
+9)  构建 ShelveLoc 与 US 的联合频数表（5分）;  
+10)  绘制 US 堆叠条形图，按 ShelveLoc 填充颜色 （5分）;  
+11)  按 US 分组，绘制 Price 与 Sales 的散点图，用颜色区分 ShelveLoc（5分）;  
+12)  按 Urban 和 ShelveLoc 分组，绘制 Age 的箱线图（5分）。
+
+
+```{r eval=TRUE}
+# 1. Group by ShelveLoc and plot histogram of Sales with density curve
+library(ggplot2)
+
+ggplot(Carseats, aes(x = Sales, fill = ShelveLoc)) +
+  geom_histogram(aes(y = ..density..), alpha = 0.7, position = "identity", bins = 30) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ ShelveLoc) +
+  labs(title = "Sales Histogram (by Shelve Location)", x = "Sales (in thousands)", y = "Density") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 2. Group by ShelveLoc and plot boxplot of Price
+ggplot(Carseats, aes(x = ShelveLoc, y = Price, fill = ShelveLoc)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Price Distribution by Shelve Location", x = "Shelve Location", y = "Price (in dollars)") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 3. Group by Urban and plot violin plot of Price
+ggplot(Carseats, aes(x = Urban, y = Price, fill = Urban)) +
+  geom_violin(alpha = 0.7) +
+  labs(title = "Price Distribution in Urban and Non-Urban Areas", x = "Urban", y = "Price (in dollars)") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+# 4. Plot horizontal bar chart of ShelveLoc
+shelf_counts <- table(Carseats$ShelveLoc)
+shelf_df <- data.frame(ShelveLoc = names(shelf_counts), Count = as.vector(shelf_counts))
+
+ggplot(shelf_df, aes(x = reorder(ShelveLoc, -Count), y = Count, fill = ShelveLoc)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Shelve Location Distribution", x = "Shelve Location", y = "Frequency") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position = "none")
+
+# 5. Plot pie chart of ShelveLoc with percentage labels
+library(scales)
+
+# Calculate percentages
+shelf_pct <- prop.table(table(Carseats$ShelveLoc)) * 100
+shelf_pie_df <- data.frame(
+  ShelveLoc = names(shelf_pct),
+  count = as.vector(table(Carseats$ShelveLoc)),
+  pct = as.vector(shelf_pct)
+)
+
+# Add label positions
+shelf_pie_df$pos <- cumsum(shelf_pie_df$pct) - shelf_pie_df$pct/2
+shelf_pie_df$label <- paste0(shelf_pie_df$ShelveLoc, "\n", round(shelf_pie_df$pct, 1), "%")
+
+ggplot(shelf_pie_df, aes(x = "", y = pct, fill = ShelveLoc)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = pos, label = label), size = 4) +
+  labs(title = "Shelve Location Distribution") +
+  theme_void() +
+  scale_fill_brewer(palette = "Set1")
+
+# 6. Plot scatter plot of Sales vs Income, color by ShelveLoc, facet by US
+p6 <- ggplot(Carseats, aes(x = Income, y = Sales, color = ShelveLoc)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ US) +
+  labs(title = "Sales vs Income (by Shelve Location and Country)", 
+       x = "Median Household Income (in thousands)", 
+       y = "Sales (in thousands)") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+print(p6)
+
+# 7. Calculate Pearson correlation between Sales and Income and add to scatter plot
+cor_overall <- cor(Carseats$Sales, Carseats$Income, method = "pearson")
+cor_US_Yes <- cor(Carseats$Sales[Carseats$US == "Yes"], 
+                 Carseats$Income[Carseats$US == "Yes"], method = "pearson")
+cor_US_No <- cor(Carseats$Sales[Carseats$US == "No"], 
+                Carseats$Income[Carseats$US == "No"], method = "pearson")
+
+# Create label data frame
+labels_df <- data.frame(
+  US = c("Yes", "No"),
+  Income = c(80, 80),
+  Sales = c(13, 13),
+  label = c(paste0("r = ", round(cor_US_Yes, 3)),
+            paste0("r = ", round(cor_US_No, 3)))
+)
+
+p7 <- ggplot(Carseats, aes(x = Income, y = Sales, color = ShelveLoc)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ US) +
+  geom_text(data = labels_df, aes(label = label), color = "black", size = 5) +
+  labs(title = "Sales vs Income (by Shelve Location and Country)", 
+       subtitle = paste0("Overall Correlation: r = ", round(cor_overall, 3)),
+       x = "Median Household Income (in thousands)", 
+       y = "Sales (in thousands)") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+print(p7)
+
+# 8. Plot scatterplot matrix of Sales, Price, and CompPrice
+library(GGally)
+
+ggpairs(Carseats, 
+        columns = c("Sales", "Price", "CompPrice"),
+        aes(color = ShelveLoc, alpha = 0.5),
+        upper = list(continuous = wrap("cor", size = 3)),
+        title = "Scatterplot Matrix of Sales, Price, and CompPrice") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+# 9. Create contingency table of ShelveLoc and US
+shelf_us_table <- table(ShelveLoc = Carseats$ShelveLoc, US = Carseats$US)
+print(shelf_us_table)
+print(addmargins(shelf_us_table)) # Add marginal totals
+
+# 10. Plot stacked bar chart of US, filled by ShelveLoc
+shelf_us_df <- as.data.frame(table(US = Carseats$US, ShelveLoc = Carseats$ShelveLoc))
+
+ggplot(shelf_us_df, aes(x = US, y = Freq, fill = ShelveLoc)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(title = "Shelve Location Distribution by Country", x = "Country", y = "Frequency") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+# 11. Group by US and plot scatter plot of Price vs Sales, color by ShelveLoc
+ggplot(Carseats, aes(x = Price, y = Sales, color = ShelveLoc)) +
+  geom_point(size = 2, alpha = 0.7) +
+  facet_wrap(~ US) +
+  geom_smooth(method = "lm", se = FALSE, alpha = 0.5) +
+  labs(title = "Price vs Sales (by Shelve Location and Country)", 
+       x = "Price (in dollars)", 
+       y = "Sales (in thousands)") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+# 12. Group by Urban and ShelveLoc and plot boxplot of Age
+ggplot(Carseats, aes(x = ShelveLoc, y = Age, fill = Urban)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age Distribution by Urban Type and Shelve Location", 
+       x = "Shelve Location", 
+       y = "Median Age") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+
+```
+
+
+
+
