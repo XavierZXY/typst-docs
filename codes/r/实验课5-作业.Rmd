@@ -1,0 +1,493 @@
+---
+title: "实验课5-作业"
+author: "邹翔宇"
+date: "2025-04-09"
+documentclass: ctexart
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+  html_document: default
+---
+
+### 第一题（20分）
+
+1)  计算自由度为5的卡方分布中取值为2时的密度值和累积概率（5分）;  
+2)  绘制均值为0、方差分别为1、2、3的正态分布曲线（不同颜色），并添加图例（5分）;  
+3)  在同一图中绘制自由度为5、10、20、30的t分布曲线（不同线型），并与标准正态分布对比（5分）;  
+4)  绘制自由度为3、5、10、20的卡方分布曲线（不同颜色），说明其形态变化（5分）。
+
+
+```{r eval=TRUE}
+# 1. 计算自由度为5的卡方分布中取值为2时的密度值和累积概率
+# 密度值
+density_value <- dchisq(2, df = 5)
+# 累积概率
+cumulative_prob <- pchisq(2, df = 5)
+
+cat("自由度为5的卡方分布中取值为2时:\n")
+cat("密度值:", density_value, "\n")
+cat("累积概率:", cumulative_prob, "\n\n")
+
+# 2. 绘制均值为0、方差分别为1、2、3的正态分布曲线
+x <- seq(-6, 6, length.out = 1000)
+y1 <- dnorm(x, mean = 0, sd = 1)  # 方差=1
+y2 <- dnorm(x, mean = 0, sd = sqrt(2))  # 方差=2
+y3 <- dnorm(x, mean = 0, sd = sqrt(3))  # 方差=3
+
+plot(x, y1, type = "l", col = "blue", lwd = 2, 
+     xlab = "x", ylab = "密度", 
+     main = "不同方差的正态分布曲线")
+lines(x, y2, col = "red", lwd = 2)
+lines(x, y3, col = "green", lwd = 2)
+legend("topright", legend = c("方差=1", "方差=2", "方差=3"),
+       col = c("blue", "red", "green"), lwd = 2)
+
+# 3. 绘制自由度为5、10、20、30的t分布曲线，并与标准正态分布对比
+x <- seq(-4, 4, length.out = 1000)
+y_norm <- dnorm(x, mean = 0, sd = 1)  # 标准正态分布
+y_t5 <- dt(x, df = 5)    # 自由度为5的t分布
+y_t10 <- dt(x, df = 10)  # 自由度为10的t分布
+y_t20 <- dt(x, df = 20)  # 自由度为20的t分布
+y_t30 <- dt(x, df = 30)  # 自由度为30的t分布
+
+plot(x, y_norm, type = "l", col = "black", lwd = 2,
+     xlab = "x", ylab = "密度", 
+     main = "t分布与标准正态分布对比")
+lines(x, y_t5, col = "red", lwd = 2, lty = 2)
+lines(x, y_t10, col = "blue", lwd = 2, lty = 3)
+lines(x, y_t20, col = "green", lwd = 2, lty = 4)
+lines(x, y_t30, col = "purple", lwd = 2, lty = 5)
+legend("topright", 
+       legend = c("标准正态分布", "t分布(df=5)", "t分布(df=10)", 
+                  "t分布(df=20)", "t分布(df=30)"),
+       col = c("black", "red", "blue", "green", "purple"), 
+       lwd = 2, lty = c(1, 2, 3, 4, 5))
+
+# 4. 绘制自由度为3、5、10、20的卡方分布曲线
+x <- seq(0, 30, length.out = 1000)
+y_chi3 <- dchisq(x, df = 3)   # 自由度为3的卡方分布
+y_chi5 <- dchisq(x, df = 5)   # 自由度为5的卡方分布
+y_chi10 <- dchisq(x, df = 10) # 自由度为10的卡方分布
+y_chi20 <- dchisq(x, df = 20) # 自由度为20的卡方分布
+
+plot(x, y_chi3, type = "l", col = "red", lwd = 2,
+     xlab = "x", ylab = "密度", 
+     main = "不同自由度的卡方分布曲线",
+     ylim = c(0, max(y_chi3)))
+lines(x, y_chi5, col = "blue", lwd = 2)
+lines(x, y_chi10, col = "green", lwd = 2)
+lines(x, y_chi20, col = "purple", lwd = 2)
+legend("topright", 
+       legend = c("df=3", "df=5", "df=10", "df=20"),
+       col = c("red", "blue", "green", "purple"), lwd = 2)
+
+# 卡方分布形态变化说明
+
+# 1. 随着自由度的增加，分布曲线逐渐向右移动，峰值位置大致对应于自由度值
+# 2. 小自由度时(如df=3)，分布呈明显的右偏态
+# 3. 自由度增大时(如df=20)，分布趋向对称，接近正态分布
+# 4. 分布的方差随自由度增加而增大
+
+```
+
+
+### 第二题（20分）
+
+载入R自带的数据集sleep（变量extra为睡眠增加时间，group为两组），使用Z检验完成以下任务：
+
+
+1)  假设总体标准差为1.5，检验extra的均值是否为0。写出原假设和备择假设，解释结果（5分）;  
+2)  假设两组总体标准差分别为1.2和1.8，检验两组extra的均值是否不同。写出原假设和备择假设，解释结果（5分）;  
+3)  检验group=1组的extra均值是否大于0.5（假设总体标准差为1.2），解释结果（5分）;  
+4)  若实际标准差未知，改用t检验，比较Z检验和t检验的两总体均值差异的检验结果（5分）。  
+
+
+```{r eval=TRUE}
+# 载入sleep数据集
+data(sleep)
+
+# 1. 假设总体标准差为1.5，检验extra的均值是否为0
+# 原假设 H0: μ = 0
+# 备择假设 H1: μ ≠ 0
+n <- length(sleep$extra)
+mean_extra <- mean(sleep$extra)
+sd_known <- 1.5
+z_value <- (mean_extra - 0) / (sd_known / sqrt(n))
+p_value <- 2 * (1 - pnorm(abs(z_value)))  # 双侧检验
+
+cat("1. 检验extra的均值是否为0(总体标准差为1.5):\n")
+cat("原假设 H0: μ = 0\n")
+cat("备择假设 H1: μ ≠ 0\n")
+cat("样本均值:", mean_extra, "\n")
+cat("Z检验统计量:", z_value, "\n")
+cat("p值:", p_value, "\n")
+if (p_value < 0.05) {
+  cat("结论: 在α=0.05的显著性水平下，拒绝原假设，认为extra的均值不为0\n\n")
+} else {
+  cat("结论: 在α=0.05的显著性水平下，不能拒绝原假设，没有足够证据表明extra的均值不为0\n\n")
+}
+
+# 2. 假设两组总体标准差分别为1.2和1.8，检验两组extra的均值是否不同
+# 原假设 H0: μ1 = μ2
+# 备择假设 H1: μ1 ≠ μ2
+group1 <- sleep$extra[sleep$group == 1]
+group2 <- sleep$extra[sleep$group == 2]
+n1 <- length(group1)
+n2 <- length(group2)
+mean1 <- mean(group1)
+mean2 <- mean(group2)
+sd1_known <- 1.2
+sd2_known <- 1.8
+
+# Z检验统计量
+z_value_2 <- (mean1 - mean2) / sqrt((sd1_known^2 / n1) + (sd2_known^2 / n2))
+p_value_2 <- 2 * (1 - pnorm(abs(z_value_2)))  # 双侧检验
+
+cat("2. 检验两组extra的均值是否不同(总体标准差分别为1.2和1.8):\n")
+cat("原假设 H0: μ1 = μ2\n")
+cat("备择假设 H1: μ1 ≠ μ2\n")
+cat("组1均值:", mean1, "\n")
+cat("组2均值:", mean2, "\n")
+cat("Z检验统计量:", z_value_2, "\n")
+cat("p值:", p_value_2, "\n")
+if (p_value_2 < 0.05) {
+  cat("结论: 在α=0.05的显著性水平下，拒绝原假设，认为两组extra的均值存在显著差异\n\n")
+} else {
+  cat("结论: 在α=0.05的显著性水平下，不能拒绝原假设，没有足够证据表明两组extra的均值存在显著差异\n\n")
+}
+
+# 3. 检验group=1组的extra均值是否大于0.5（假设总体标准差为1.2）
+# 原假设 H0: μ ≤ 0.5
+# 备择假设 H1: μ > 0.5
+z_value_3 <- (mean1 - 0.5) / (sd1_known / sqrt(n1))
+p_value_3 <- 1 - pnorm(z_value_3)  # 单侧检验(右侧)
+
+cat("3. 检验group=1组的extra均值是否大于0.5(总体标准差为1.2):\n")
+cat("原假设 H0: μ ≤ 0.5\n")
+cat("备择假设 H1: μ > 0.5\n")
+cat("组1均值:", mean1, "\n")
+cat("Z检验统计量:", z_value_3, "\n")
+cat("p值:", p_value_3, "\n")
+if (p_value_3 < 0.05) {
+  cat("结论: 在α=0.05的显著性水平下，拒绝原假设，认为group=1组的extra均值显著大于0.5\n\n")
+} else {
+  cat("结论: 在α=0.05的显著性水平下，不能拒绝原假设，没有足够证据表明group=1组的extra均值大于0.5\n\n")
+}
+
+# 4. 若实际标准差未知，改用t检验，比较Z检验和t检验的两总体均值差异的检验结果
+# t检验
+t_test_result <- t.test(group1, group2, var.equal = FALSE)
+
+cat("4. 比较Z检验和t检验的两总体均值差异检验结果:\n")
+cat("Z检验(已知标准差):\n")
+cat("  Z统计量:", z_value_2, "\n")
+cat("  p值:", p_value_2, "\n")
+
+cat("t检验(未知标准差):\n")
+cat("  t统计量:", t_test_result$statistic, "\n")
+cat("  p值:", t_test_result$p.value, "\n")
+cat("  自由度:", t_test_result$parameter, "\n")
+
+cat("比较结果:\n")
+if (sign(p_value_2 - 0.05) == sign(t_test_result$p.value - 0.05)) {
+  cat("Z检验和t检验得出了相同的结论")
+  if (p_value_2 < 0.05) {
+    cat("，均认为两组均值存在显著差异。\n")
+  } else {
+    cat("，均认为没有足够证据表明两组均值存在显著差异。\n")
+  }
+} else {
+  cat("Z检验和t检验得出了不同的结论：\n")
+  if (p_value_2 < 0.05) {
+    cat("Z检验认为两组均值存在显著差异，而t检验认为没有足够证据表明两组均值存在显著差异。\n")
+  } else {
+    cat("Z检验认为没有足够证据表明两组均值存在显著差异，而t检验认为两组均值存在显著差异。\n")
+  }
+}
+
+cat("差异原因分析：\n")
+cat("1. t检验考虑了样本方差的估计不确定性，而Z检验假设总体方差已知\n")
+cat("2. 小样本情况下，t检验通常比Z检验更为保守\n")
+cat("3. 当样本量增大时，t分布趋近于正态分布，t检验结果将与Z检验趋于一致\n")
+
+
+```
+
+
+### 第三题（20分）
+
+载入R自带的数据集iris（Species为分类变量），使用t检验完成以下任务：
+
+
+1)  检验setosa种类的Sepal.Length均值是否为5。写出原假设和备择假设，解释结果（5分）;  
+2)  检验setosa和versicolor的Sepal.Length均值是否相同（假设方差齐）。写出原假设和备择假设，解释结果（5分）;  
+3)  将Sepal.Length和Petal.Length视为配对数据（假设测量同一植株），检验均值差异是否为0，解释结果（5分）;  
+4)  检验Sepal.Length和Petal.Length的差异均值是否为1（5分）。  
+
+
+```{r eval=TRUE}
+# 载入数据集
+data(iris)
+
+# 1) 检验setosa种类的Sepal.Length均值是否为5
+# 提取setosa种类的数据
+setosa <- iris[iris$Species == "setosa", ]
+
+# 原假设H0: μ = 5 (setosa的Sepal.Length均值为5)
+# 备择假设H1: μ ≠ 5 (setosa的Sepal.Length均值不为5)
+t_test1 <- t.test(setosa$Sepal.Length, mu = 5)
+print("问题1: 检验setosa种类的Sepal.Length均值是否为5")
+print(t_test1)
+cat("解释: p值为", t_test1$p.value, "，小于0.05的显著性水平，因此拒绝原假设。",
+    "有足够证据表明setosa种类的Sepal.Length均值不等于5。\n实际均值约为", 
+    mean(setosa$Sepal.Length), "。\n\n")
+
+# 2) 检验setosa和versicolor的Sepal.Length均值是否相同(假设方差齐)
+# 提取versicolor种类的数据
+versicolor <- iris[iris$Species == "versicolor", ]
+
+# 原假设H0: μ1 = μ2 (两种花的Sepal.Length均值相同)
+# 备择假设H1: μ1 ≠ μ2 (两种花的Sepal.Length均值不同)
+t_test2 <- t.test(setosa$Sepal.Length, versicolor$Sepal.Length, 
+                  var.equal = TRUE)  # 假设方差齐
+print("问题2: 检验setosa和versicolor的Sepal.Length均值是否相同(假设方差齐)")
+print(t_test2)
+cat("解释: p值极小 (p < 2.2e-16)，远小于0.05的显著性水平，因此强烈拒绝原假设。",
+    "有非常充分的证据表明setosa和versicolor的Sepal.Length均值存在显著差异。\n",
+    "setosa的均值约为", mean(setosa$Sepal.Length), 
+    "，versicolor的均值约为", mean(versicolor$Sepal.Length), "。\n\n")
+
+# 3) 将Sepal.Length和Petal.Length视为配对数据，检验均值差异是否为0
+# 原假设H0: μd = 0 (Sepal.Length和Petal.Length的差异均值为0)
+# 备择假设H1: μd ≠ 0 (Sepal.Length和Petal.Length的差异均值不为0)
+t_test3 <- t.test(iris$Sepal.Length, iris$Petal.Length, paired = TRUE)
+print("问题3: 检验Sepal.Length和Petal.Length的均值差异是否为0")
+print(t_test3)
+cat("解释: p值极小 (p < 2.2e-16)，远小于0.05的显著性水平，因此强烈拒绝原假设。",
+    "有非常充分的证据表明Sepal.Length和Petal.Length的差异均值不为0。",
+    "实际差异均值约为", mean(iris$Sepal.Length - iris$Petal.Length), "。\n\n")
+
+# 4) 检验Sepal.Length和Petal.Length的差异均值是否为1
+# 原假设H0: μd = 1 (Sepal.Length和Petal.Length的差异均值为1)
+# 备择假设H1: μd ≠ 1 (Sepal.Length和Petal.Length的差异均值不为1)
+t_test4 <- t.test(iris$Sepal.Length - iris$Petal.Length, mu = 1)
+print("问题4: 检验Sepal.Length和Petal.Length的差异均值是否为1")
+print(t_test4)
+cat("解释: p值极小 (p < 2.2e-16)，远小于0.05的显著性水平，因此强烈拒绝原假设。",
+    "有非常充分的证据表明Sepal.Length和Petal.Length的差异均值不等于1。",
+    "实际差异均值约为", mean(iris$Sepal.Length - iris$Petal.Length), "。\n")
+
+
+```
+
+
+### 第四题（20分）
+
+载入R自带的数据集Titanic分析乘客存活率。
+变量包含：
+Class（舱位等级）：1st, 2nd, 3rd, Crew
+Sex（性别）：Male, Female
+Age（年龄）：Child, Adult
+Survived（是否存活）：No, Yes
+
+1)  检验乘客总体存活率是否为40%。使用binom.test()和prop.test()，比较两者的置信区间差异（5分）;  
+2)  检验男性和女性的存活率是否不同。写出原假设和备择假设，解释结果（5分）;  
+3)  检验头等舱（Class=1st）和普通舱（Class=3rd）乘客的存活率是否不同，写出原假设和备择假设，并解释结果的实际意义（5分）;  
+4)  分别检验头等舱（Class=1st）和普通舱（Class=3rd）中女性的存活率是否显著高于50%，比较两舱位的结果，讨论舱位对存活率的影响（5分）。  
+
+
+```{r eval=TRUE}
+# 载入数据集Titanic并转换为数据框
+Titanic_df <- as.data.frame(Titanic)
+
+# 1) 检验乘客总体存活率是否为40%
+# 计算存活人数和总人数
+survived_counts <- tapply(Titanic_df$Freq, Titanic_df$Survived, sum)
+survived_num <- survived_counts["Yes"]
+total_num <- sum(Titanic_df$Freq)
+
+# 使用binom.test()进行精确二项检验
+binom_test <- binom.test(survived_num, total_num, p = 0.4)
+print("问题1: 检验乘客总体存活率是否为40%（二项检验）")
+print(binom_test)
+
+# 使用prop.test()进行近似检验
+prop_test <- prop.test(survived_num, total_num, p = 0.4)
+print("问题1: 检验乘客总体存活率是否为40%（比例检验）")
+print(prop_test)
+
+# 比较两者的置信区间
+cat("binom.test的95%置信区间: [", binom_test$conf.int[1], ",", binom_test$conf.int[2], "]\n")
+cat("prop.test的95%置信区间: [", prop_test$conf.int[1], ",", prop_test$conf.int[2], "]\n")
+cat("二项检验的置信区间通常更精确但区间略宽，比例检验使用正态近似，区间较窄。\n\n")
+
+# 2) 检验男性和女性的存活率是否不同
+# 计算男性和女性的存活人数和总人数
+male_data <- subset(Titanic_df, Sex == "Male")
+female_data <- subset(Titanic_df, Sex == "Female")
+
+male_survived <- sum(male_data$Freq[male_data$Survived == "Yes"])
+male_total <- sum(male_data$Freq)
+female_survived <- sum(female_data$Freq[female_data$Survived == "Yes"])
+female_total <- sum(female_data$Freq)
+
+# 原假设H0: p_male = p_female (男性和女性存活率相同)
+# 备择假设H1: p_male ≠ p_female (男性和女性存活率不同)
+gender_test <- prop.test(c(male_survived, female_survived), 
+                         c(male_total, female_total))
+print("问题2: 检验男性和女性的存活率是否不同")
+print(gender_test)
+cat("解释: p值极小 (p < 2.2e-16)，远小于0.05的显著性水平，因此强烈拒绝原假设。\n",
+    "有非常充分的证据表明男性和女性的存活率存在显著差异。\n",
+    "男性存活率约为", round(male_survived/male_total*100, 2), "%，",
+    "女性存活率约为", round(female_survived/female_total*100, 2), "%。\n\n")
+
+# 3) 检验头等舱和普通舱乘客的存活率是否不同
+# 计算头等舱和普通舱的存活人数和总人数
+first_class <- subset(Titanic_df, Class == "1st")
+third_class <- subset(Titanic_df, Class == "3rd")
+
+first_survived <- sum(first_class$Freq[first_class$Survived == "Yes"])
+first_total <- sum(first_class$Freq)
+third_survived <- sum(third_class$Freq[third_class$Survived == "Yes"])
+third_total <- sum(third_class$Freq)
+
+# 原假设H0: p_1st = p_3rd (头等舱和普通舱存活率相同)
+# 备择假设H1: p_1st ≠ p_3rd (头等舱和普通舱存活率不同)
+class_test <- prop.test(c(first_survived, third_survived), 
+                        c(first_total, third_total))
+print("问题3: 检验头等舱和普通舱乘客的存活率是否不同")
+print(class_test)
+cat("解释: p值极小 (p < 2.2e-16)，远小于0.05的显著性水平，因此强烈拒绝原假设。\n",
+    "有非常充分的证据表明头等舱和普通舱乘客的存活率存在显著差异。\n",
+    "头等舱存活率约为", round(first_survived/first_total*100, 2), "%，",
+    "普通舱存活率约为", round(third_survived/third_total*100, 2), "%。\n",
+    "这一结果表明泰坦尼克号救生过程中存在明显的舱位优先现象，社会经济地位较高的头等舱乘客",
+    "获得了更多的生存机会，而社会经济地位较低的普通舱乘客生存机会明显较少。\n\n")
+
+# 4) 分别检验头等舱和普通舱中女性的存活率是否显著高于50%
+# 计算头等舱和普通舱中女性的存活人数和总人数
+first_female <- subset(first_class, Sex == "Female")
+third_female <- subset(third_class, Sex == "Female")
+
+first_female_survived <- sum(first_female$Freq[first_female$Survived == "Yes"])
+first_female_total <- sum(first_female$Freq)
+third_female_survived <- sum(third_female$Freq[third_female$Survived == "Yes"])
+third_female_total <- sum(third_female$Freq)
+
+# 检验头等舱女性存活率是否高于50%
+# 原假设H0: p_1st_female ≤ 0.5 (头等舱女性存活率不高于50%)
+# 备择假设H1: p_1st_female > 0.5 (头等舱女性存活率高于50%)
+first_female_test <- prop.test(first_female_survived, first_female_total, 
+                               p = 0.5, alternative = "greater")
+print("问题4: 检验头等舱女性的存活率是否显著高于50%")
+print(first_female_test)
+cat("头等舱女性存活率约为", round(first_female_survived/first_female_total*100, 2), "%\n")
+
+# 检验普通舱女性存活率是否高于50%
+# 原假设H0: p_3rd_female ≤ 0.5 (普通舱女性存活率不高于50%)
+# 备择假设H1: p_3rd_female > 0.5 (普通舱女性存活率高于50%)
+third_female_test <- prop.test(third_female_survived, third_female_total, 
+                               p = 0.5, alternative = "greater")
+print("问题4: 检验普通舱女性的存活率是否显著高于50%")
+print(third_female_test)
+cat("普通舱女性存活率约为", round(third_female_survived/third_female_total*100, 2), "%\n\n")
+
+cat("比较和讨论：\n",
+    "头等舱女性存活率显著高于50%，p值极小，几乎所有头等舱女性都获救了。\n",
+    "普通舱女性存活率虽然高于50%，但p值较大，存活率显著低于头等舱女性。\n",
+    "这表明舱位等级对女性存活率有明显影响。虽然'女士优先'的救生原则在泰坦尼克号事故中有所体现，\n",
+    "但社会经济地位仍显著影响生存机会，普通舱女性获救几率明显低于头等舱女性。\n",
+    "这反映了当时社会阶层差异对灾难救援的影响。\n")
+
+
+```
+
+
+
+### 第五题（20分）
+
+载入R自带的气温数据集airquality进行分析：
+
+
+1)  检验5月和6月的Temp中位数是否相同。写出原假设和备择假设，解释结果（5分）;  
+2)  将5月和6月同一日的温度视为配对数据（截取前31天），检验差异中位数是否为0，解释结果（5分）;  
+3)  检验5月温度的中位数是否为70，解释结果（5分）;  
+4)  若数据服从正态分布，检验5月和6月的Temp均数是否相同，并解释结果。得出的结论与（1）有什么不同？（5分）。  
+
+
+```{r eval=TRUE}
+# 载入数据集
+data(airquality)
+
+# 提取5月和6月的温度数据
+may_temp <- airquality$Temp[airquality$Month == 5]
+june_temp <- airquality$Temp[airquality$Month == 6]
+
+# 1) 检验5月和6月的Temp中位数是否相同
+# 原假设H0: 两组中位数相同
+# 备择假设H1: 两组中位数不同
+median_test <- wilcox.test(may_temp, june_temp)
+print("问题1: 检验5月和6月的Temp中位数是否相同")
+print(median_test)
+cat("解释: p值为", median_test$p.value, "，大于0.05的显著性水平，因此不能拒绝原假设。\n",
+    "没有足够证据表明5月和6月的温度中位数存在显著差异。\n", 
+    "5月温度中位数为", median(may_temp), "，6月温度中位数为", median(june_temp), "。\n\n")
+
+# 2) 将5月和6月同一日的温度视为配对数据(截取前31天)，检验差异中位数是否为0
+# 由于5月有31天，6月有30天，取两者的前31天数据
+may_first31 <- may_temp[1:31]
+june_first31 <- june_temp[1:30]  # 6月只有30天
+# 确保配对数据长度相同
+paired_length <- min(length(may_first31), length(june_first31))
+may_paired <- may_first31[1:paired_length]
+june_paired <- june_first31[1:paired_length]
+
+# 原假设H0: 差异的中位数为0
+# 备择假设H1: 差异的中位数不为0
+paired_test <- wilcox.test(may_paired, june_paired, paired = TRUE)
+print("问题2: 检验5月和6月同一日温度的差异中位数是否为0")
+print(paired_test)
+cat("解释: p值为", paired_test$p.value, "，大于0.05的显著性水平，因此不能拒绝原假设。\n",
+    "没有足够证据表明5月和6月同一日的温度差异中位数显著不为0。\n",
+    "温度差异(5月-6月)的中位数为", median(may_paired - june_paired), "。\n\n")
+
+# 3) 检验5月温度的中位数是否为70
+# 原假设H0: 5月温度的中位数等于70
+# 备择假设H1: 5月温度的中位数不等于70
+may_median_test <- wilcox.test(may_temp, mu = 70)
+print("问题3: 检验5月温度的中位数是否为70")
+print(may_median_test)
+cat("解释: p值为", may_median_test$p.value, "，大于0.05的显著性水平，因此不能拒绝原假设。\n",
+    "没有足够证据表明5月温度的中位数显著不等于70。\n", 
+    "5月温度的实际中位数为", median(may_temp), "。\n\n")
+
+# 4) 若数据服从正态分布，检验5月和6月的Temp均数是否相同
+# 首先进行正态性检验
+shapiro_may <- shapiro.test(may_temp)
+shapiro_june <- shapiro.test(june_temp)
+print("5月温度的正态性检验:")
+print(shapiro_may)
+print("6月温度的正态性检验:")
+print(shapiro_june)
+
+# 不管正态性检验结果如何，假设数据服从正态分布进行t检验
+# 原假设H0: 两月温度均值相同
+# 备择假设H1: 两月温度均值不同
+t_test <- t.test(may_temp, june_temp)
+print("问题4: 若数据服从正态分布，检验5月和6月的Temp均数是否相同")
+print(t_test)
+cat("解释: p值为", t_test$p.value, "，大于0.05的显著性水平，因此不能拒绝原假设。\n",
+    "假设数据服从正态分布，没有足够证据表明5月和6月的温度均值存在显著差异。\n",
+    "5月温度均值为", mean(may_temp), "，6月温度均值为", mean(june_temp), "。\n\n")
+
+cat("比较问题1和问题4的结论：\n",
+    "问题1使用Wilcoxon秩和检验(非参数检验)比较中位数差异，不需要正态性假设。\n",
+    "问题4使用t检验(参数检验)比较均值差异，假定数据服从正态分布。\n",
+    "两种方法得出的结论相似，都没有发现5月和6月温度存在显著差异。\n",
+    "但是，t检验比较的是均值，Wilcoxon检验比较的是中位数，当数据分布偏斜时，\n",
+    "两种方法可能得出不同结论。在这个数据集中，温度数据相对对称，所以结论一致。\n")
+
+
+```
+
